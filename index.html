@@ -121,7 +121,7 @@ ol.steps { margin: 0; padding-left: 20px; display: grid; gap: 6px; max-width: 68
       <ol class="steps">
         <li>Apri Bambu Studio e scegli la stampante giusta.</li>
         <li>Usa <b>File → Importa → Importa 3MF/STL/STEP…</b> (Ctrl+I). Così Bambu crea da solo i 4 slot filamento.</li>
-        <li>Nel pannello a sinistra imposta gli slot 1–4 come sopra: nero, blu, giallo, bianco. Con l'AMS basta sincronizzare se i rotoli sono in quest'ordine.</li>
+        <li>Nel pannello a sinistra imposta gli slot 1–4 come sopra: nero, blu, bianco, grigio. Con l'AMS basta sincronizzare se i rotoli sono in quest'ordine.</li>
         <li>Lascia il portachiavi con il fronte verso l'alto, poi sezionalo e stampa.</li>
       </ol>
     </section>
@@ -154,10 +154,10 @@ var cdt2d=(()=>{var p=(n,t)=>()=>(t||n((t={exports:{}}).exports,t),t.exports);va
   const FILAMENTS = [
     { slot: 1, name: 'Nero', hex: '#1a1a1a' },
     { slot: 2, name: 'Blu', hex: '#1f6fd0' },
-    { slot: 3, name: 'Giallo', hex: '#f2cc00' },
-    { slot: 4, name: 'Bianco', hex: '#f2f2f2' },
+    { slot: 3, name: 'Bianco', hex: '#f2f2f2' },
+    { slot: 4, name: 'Grigio', hex: '#8a9099' },
   ];
-  const NERO = 1, BLU = 2, GIALLO = 3, BIANCO = 4;
+  const NERO = 1, BLU = 2, BIANCO = 3, GRIGIO = 4;
 
   // Logo HI-WAY tracciato dal disegno originale (mm, coordinate di lettura, centro piastrina = 0,0)
   const LOGO = {"ink":[[[-19.5445,2.8939],[-19.9451,0.7448],[-16.5712,0.7448],[-16.1706,2.8939]],[[2.0697,3.5742],[2.5682,2.8939],[1.7404,2.8939]],[[5.9866,-2.1543],[8.8353,-2.1543],[14.8531,5.7174],[12.0312,5.7174],[10.5445,3.8056],[8.9777,5.7174],[5.9866,5.7174],[8.9599,1.8249]],[[6.4407,1.8249],[3.4228,5.7174],[0.4941,5.7174],[-0.8947,2.8939],[-2.2122,2.8939],[-3.1736,0.7448],[-2.0252,0.7448],[-3.4496,-2.1543],[-0.5653,-2.1543],[0.9214,0.7448],[2.6395,0.7448],[0.4941,-2.1543],[3.4228,-2.1543],[6.2893,1.4822]],[[-14.4881,-2.1543],[-11.6039,-2.1543],[-9.5386,1.8249],[-9.0757,-2.1543],[-6.1914,-2.1543],[-2.1231,5.7174],[-4.776,5.7174],[-7.0549,1.3131],[-7.5445,5.7174],[-9.9748,5.7174],[-12.2448,1.3843],[-12.7878,5.7174],[-15.3872,5.7174]],[[-20.1588,5.7174],[-22.8205,5.7174],[-24.3605,-2.1543],[-21.6899,-2.1543]],[[-31.7671,5.7174],[-33.3605,-2.1543],[-30.6899,-2.1543],[-30.0579,0.7448],[-27.77,0.7448],[-28.3042,-2.1543],[-25.6335,-2.1543],[-24.0401,5.7174],[-26.7107,5.7174],[-27.3249,2.8939],[-29.6306,2.8939],[-29.1053,5.7174]]],"blue":[[[-19.5445,2.8939],[-19.9451,0.7448],[-16.5623,0.7448],[-16.1617,2.8939]],[[0.503,5.7174],[2.6039,2.8939],[-2.2122,2.8939],[-3.1647,0.7448],[2.6395,0.7448],[0.4941,-2.1543],[3.4228,-2.1543],[6.2893,1.4822],[6.4407,1.8249],[3.4318,5.7174]]],"slogan":{"x0":-14.991,"x1":8.795,"y0":-5.733,"y1":-4.095},"circle":{"cx":26.24,"cy":0.04,"ro":7.12,"ri":5.92},"digits":{"h":6.41,"w2":8.55}};
@@ -231,11 +231,9 @@ var cdt2d=(()=>{var p=(n,t)=>()=>(t||n((t={exports:{}}).exports,t),t.exports);va
       const E = 1 / 0.72, bx = 30.15;
 
       // RETRO (coordinate di lettura, specchiate: si legge giusto girando il portachiavi)
-      const ink = xorRings(LOGO.ink), bluMark = xorRings(LOGO.blue);
+      const LDY = -1.78; // senza slogan: scritta centrata in altezza come il cerchio
+      const ink = xorRings(moveRings(LOGO.ink, 1, 0, LDY)), bluMark = xorRings(moveRings(LOGO.blue, 1, 0, LDY));
       const markDark = pc.difference(ink, bluMark);
-      const sl = LOGO.slogan, sr = glyphRings(nfont, 'ANYWHERE. ANYTIME.', 10), sb = bbox(sr);
-      const sk = (sl.x1 - sl.x0) / (sb[2] - sb[0]);
-      const slogan = xorRings(moveRings(sr, sk, sl.x0 - sb[0] * sk, sl.y0 - sb[1] * sk));
       const C = LOGO.circle, numRing = ring(C.cx, C.cy, C.ro, C.ri);
       let num = [];
       if (v.num) {
@@ -246,16 +244,17 @@ var cdt2d=(()=>{var p=(n,t)=>()=>(t||n((t={exports:{}}).exports,t),t.exports);va
         num = xorRings(moveRings(nr, k, C.cx - (nb[0] + nb[2]) / 2 * k, C.cy - (nb[1] + nb[3]) / 2 * k));
       }
       const logoGrigio = mirror(markDark);
-      const logoBlu = mirror(U(bluMark, slogan));
+      const logoBlu = mirror(bluMark);
       const logoScuro = mirror(U(numRing, num));
       const out = outline();
       const clip = mp => pc.union(snap(pc.intersection(mp, out)));
       const lg = tidy(clip(logoGrigio)), lb = tidy(clip(logoBlu)), ls = tidy(clip(logoScuro));
-      const backWhite = pc.difference(out, U(lg, lb, ls));
-      add('Retro bianco', BIANCO, backWhite, Z.back0, Z.back1);
-      add('Logo HI-WAY nero', NERO, lg, Z.back0, Z.back1);
+      // retro: fondo nero, scritta HI-WAY grigia, trattino e freccia blu, cerchio e numero grigi (niente slogan)
+      const backBlack = pc.difference(out, U(lg, lb, ls));
+      add('Retro nero', NERO, backBlack, Z.back0, Z.back1);
+      add('Logo HI-WAY grigio', GRIGIO, lg, Z.back0, Z.back1);
       add('Logo blu', BLU, lb, Z.back0, Z.back1);
-      add('Cerchio e numero retro', NERO, ls, Z.back0, Z.back1);
+      add('Cerchio e numero retro', GRIGIO, ls, Z.back0, Z.back1);
 
       // CORPO
       add('Corpo', NERO, out, Z.back1, Z.base1);
@@ -267,12 +266,14 @@ var cdt2d=(()=>{var p=(n,t)=>()=>(t||n((t={exports:{}}).exports,t),t.exports);va
       const full = v.targa.trim();
       let sz = 18 * .52 * .7 * E; const w = aw(full, sz); if (w > 47) sz *= 47 / w;
       add('Numero targa', NERO, textC(full, sz, 0, 0), Z.ins1, Z.top1);
-      add('Stelle UE', GIALLO, U(...[...Array(12)].map((_, i) => { const a = i * 30 * PI / 180; return star(-bx - 2.7 * Math.sin(a), 3.5 + 2.7 * Math.cos(a), .55); })), Z.ins1, Z.top1);
-      add('I', BIANCO, textC('I', 4.2 * E, -bx, -4.5), Z.ins1, Z.top1);
+      // banda sinistra: I centrata nella banda (niente stelle)
+      const iR = glyphRings(font, 'I', 4.2 * E), iB = bbox(iR);
+      add('I', BIANCO, xorRings(moveRings(iR, 1, -bx - (iB[0] + iB[2]) / 2, -(iB[1] + iB[3]) / 2)), Z.ins1, Z.top1);
+      // banda destra: cerchio con anno + provincia, in bianco (niente giallo)
       const destra = [ring(bx, 3.2, 3, 2.2)];
       if (v.anno) destra.push(textC(v.anno, 2.2 * E, bx, 3.2));
       if (v.prov) destra.push(textC(v.prov, 3.2 * E, bx, -4));
-      add('Provincia e anno', GIALLO, U(...destra), Z.ins1, Z.top1);
+      add('Provincia e anno', BIANCO, U(...destra), Z.ins1, Z.top1);
       return parts;
     }
 
@@ -376,8 +377,8 @@ var cdt2d=(()=>{var p=(n,t)=>()=>(t||n((t={exports:{}}).exports,t),t.exports);va
 
     function clean(raw) {
       const targa = String(raw.targa || '').toUpperCase().replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim();
-      const prov = String(raw.prov || '').toUpperCase().trim();
-      const anno = String(raw.anno || '').trim();
+        const prov = String(raw.prov || '').toUpperCase().trim();
+    const anno = String(raw.anno || '').trim();
       const num = String(raw.num || '').trim();
       const errors = [];
       if (!targa || !/^[A-Z0-9 ]{1,10}$/.test(targa)) errors.push('Targa: solo lettere e numeri (es. AB 123 CD)');
