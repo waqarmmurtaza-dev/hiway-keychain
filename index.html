@@ -266,9 +266,8 @@ var cdt2d=(()=>{var p=(n,t)=>()=>(t||n((t={exports:{}}).exports,t),t.exports);va
       const full = v.targa.trim();
       let sz = 18 * .52 * .7 * E; const w = aw(full, sz); if (w > 47) sz *= 47 / w;
       add('Numero targa', NERO, textC(full, sz, 0, 0), Z.ins1, Z.top1);
-      // banda sinistra: I centrata nella banda (niente stelle)
-      const iR = glyphRings(font, 'I', 4.2 * E), iB = bbox(iR);
-      add('I', BIANCO, xorRings(moveRings(iR, 1, -bx - (iB[0] + iB[2]) / 2, -(iB[1] + iB[3]) / 2)), Z.ins1, Z.top1);
+      // banda sinistra: I in basso, allineata alla sigla della provincia (niente stelle)
+      add('I', BIANCO, textC('I', 4.2 * E, -bx, -4.5), Z.ins1, Z.top1);
       // banda destra: cerchio con anno + provincia, in bianco (niente giallo)
       const destra = [ring(bx, 3.2, 3, 2.2)];
       if (v.anno) destra.push(textC(v.anno, 2.2 * E, bx, 3.2));
