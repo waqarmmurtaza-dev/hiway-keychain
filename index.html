@@ -121,8 +121,9 @@ ol.steps { margin: 0; padding-left: 20px; display: grid; gap: 6px; max-width: 68
       <ol class="steps">
         <li>Apri Bambu Studio e scegli la stampante giusta.</li>
         <li>Usa <b>File → Importa → Importa 3MF/STL/STEP…</b> (Ctrl+I). Così Bambu crea da solo i 4 slot filamento.</li>
-        <li>Nel pannello a sinistra imposta gli slot 1–4 come sopra: nero, blu, bianco, grigio. Con l'AMS basta sincronizzare se i rotoli sono in quest'ordine.</li>
-        <li>Lascia il portachiavi con il fronte verso l'alto, poi sezionalo e stampa.</li>
+        <li>Nel pannello a sinistra imposta gli slot 1–4 come sopra: nero, bianco, grigio, blu. Con l'AMS basta sincronizzare se i rotoli sono in quest'ordine.</li>
+        <li>In alto scegli il profilo di stampa <b>0.12mm High Quality @BBL P2S</b>. I cambi colore cadono esattamente su un layer, così i bordi tra i colori restano netti.</li>
+        <li>Lascia il portachiavi con il fronte verso l'alto, senza supporti, poi sezionalo e stampa.</li>
       </ol>
     </section>
   </div>
@@ -153,20 +154,21 @@ var cdt2d=(()=>{var p=(n,t)=>()=>(t||n((t={exports:{}}).exports,t),t.exports);va
   // Slot filamento in Bambu Studio (1-based)
   const FILAMENTS = [
     { slot: 1, name: 'Nero', hex: '#1a1a1a' },
-    { slot: 2, name: 'Blu', hex: '#1f6fd0' },
-    { slot: 3, name: 'Bianco', hex: '#f2f2f2' },
-    { slot: 4, name: 'Grigio', hex: '#8a9099' },
+    { slot: 2, name: 'Bianco', hex: '#f2f2f2' },
+    { slot: 3, name: 'Grigio', hex: '#8a9099' },
+    { slot: 4, name: 'Blu', hex: '#23357a' },
   ];
-  const NERO = 1, BLU = 2, BIANCO = 3, GRIGIO = 4;
+  const NERO = 1, BIANCO = 2, GRIGIO = 3, BLU = 4;   // ordine dell'AMS: nero, bianco, grigio, blu
 
   // Logo HI-WAY tracciato dal disegno originale (mm, coordinate di lettura, centro piastrina = 0,0)
   const LOGO = {"ink":[[[-19.5445,2.8939],[-19.9451,0.7448],[-16.5712,0.7448],[-16.1706,2.8939]],[[2.0697,3.5742],[2.5682,2.8939],[1.7404,2.8939]],[[5.9866,-2.1543],[8.8353,-2.1543],[14.8531,5.7174],[12.0312,5.7174],[10.5445,3.8056],[8.9777,5.7174],[5.9866,5.7174],[8.9599,1.8249]],[[6.4407,1.8249],[3.4228,5.7174],[0.4941,5.7174],[-0.8947,2.8939],[-2.2122,2.8939],[-3.1736,0.7448],[-2.0252,0.7448],[-3.4496,-2.1543],[-0.5653,-2.1543],[0.9214,0.7448],[2.6395,0.7448],[0.4941,-2.1543],[3.4228,-2.1543],[6.2893,1.4822]],[[-14.4881,-2.1543],[-11.6039,-2.1543],[-9.5386,1.8249],[-9.0757,-2.1543],[-6.1914,-2.1543],[-2.1231,5.7174],[-4.776,5.7174],[-7.0549,1.3131],[-7.5445,5.7174],[-9.9748,5.7174],[-12.2448,1.3843],[-12.7878,5.7174],[-15.3872,5.7174]],[[-20.1588,5.7174],[-22.8205,5.7174],[-24.3605,-2.1543],[-21.6899,-2.1543]],[[-31.7671,5.7174],[-33.3605,-2.1543],[-30.6899,-2.1543],[-30.0579,0.7448],[-27.77,0.7448],[-28.3042,-2.1543],[-25.6335,-2.1543],[-24.0401,5.7174],[-26.7107,5.7174],[-27.3249,2.8939],[-29.6306,2.8939],[-29.1053,5.7174]]],"blue":[[[-19.5445,2.8939],[-19.9451,0.7448],[-16.5623,0.7448],[-16.1617,2.8939]],[[0.503,5.7174],[2.6039,2.8939],[-2.2122,2.8939],[-3.1647,0.7448],[2.6395,0.7448],[0.4941,-2.1543],[3.4228,-2.1543],[6.2893,1.4822],[6.4407,1.8249],[3.4318,5.7174]]],"slogan":{"x0":-14.991,"x1":8.795,"y0":-5.733,"y1":-4.095},"circle":{"cx":26.24,"cy":0.04,"ro":7.12,"ri":5.92},"digits":{"h":6.41,"w2":8.55}};
 
   // Quote Z (mm), stampa con il fronte verso l'alto
   const Z = {
-    back0: 0, back1: 0.6,      // retro intarsiato: bianco + logo a filo
-    base1: 2.2,                // corpo nero 0.6-2.2
-    ins1: 2.6,                 // inserti bianco/blu 2.2-2.6
+    // ogni cambio colore cade esattamente su un layer sia con layer 0.20 sia con 0.12 (primo layer 0.20)
+    back0: 0, back1: 0.8,      // retro intarsiato: fondo + logo a filo
+    base1: 2.0,                // corpo nero 0.8-2.0
+    ins1: 2.6,                 // inserti bianco/blu 2.0-2.6 (0.6 mm: coprenti sul nero)
     top1: 3.2,                 // dettagli in rilievo e bordo fino a 3.2
   };
 
